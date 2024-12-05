@@ -218,6 +218,38 @@ public class Graph {
   // | Observers |
   // +-----------+
 
+ 
+  public void reachableFromHelper(PrintWriter pen, int vertex) {
+    Iterable<Edge> neighbors = edgesFrom(vertex);
+    if (!isMarked(vertex)) {
+      pen.print(vertex + " ");
+    }
+    for (Edge neighbor : neighbors) {
+      if (!isMarked(neighbor.target())) {
+        mark(neighbor.target());
+        reachableFromHelper(pen, neighbor.target());
+      } //if
+    } //for
+  }
+
+  public void unmarkAll(int vertex) {
+    Iterable<Edge> neighbors = edgesFrom(vertex);
+    unmark(vertex);
+    for (Edge n : neighbors) {
+      if (isMarked(n.target())) {
+      unmarkAll(n.target());
+      }
+    } //for
+  } //unmarkAll(int)
+
+  public void reachableFrom(PrintWriter pen, int vertex) {
+    unmarkAll(vertex);
+    mark(vertex);
+
+    reachableFromHelper(pen, vertex);
+    unmarkAll(vertex);
+  }
+
   /**
    * Dump the graph in a not very useful way.
    *
