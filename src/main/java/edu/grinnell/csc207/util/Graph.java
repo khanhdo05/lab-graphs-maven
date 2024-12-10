@@ -14,6 +14,8 @@ import java.util.Queue;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * A simple weighted, directed, graph.
@@ -217,7 +219,29 @@ public class Graph {
   // +-----------+---------------------------------------------------
   // | Observers |
   // +-----------+
+  public ArrayList<Integer> reachableFromHelper(ArrayList<Integer> arr, int vertex) {
+    Iterable<Edge> neighbors = edgesFrom(vertex);
 
+    if (!isMarked(vertex)) {
+      arr.add(vertex);
+    }
+    for (Edge neighbor : neighbors) {
+      if (!isMarked(neighbor.target())) {
+        mark(neighbor.target());
+        reachableFromHelper(arr, neighbor.target());
+      } //if
+    } //for
+    return arr;
+  }
+
+  public ArrayList<Integer> reachableFrom(int vertex) {
+    unmarkAll(vertex);
+    ArrayList<Integer> arrayList = new ArrayList<>();
+
+    reachableFromHelper(arrayList, vertex);
+    unmarkAll(vertex);
+    return arrayList;
+  }
  
   public void reachableFromHelper(PrintWriter pen, int vertex) {
     Iterable<Edge> neighbors = edgesFrom(vertex);
@@ -1007,5 +1031,39 @@ public class Graph {
     } // if
     return num;
   } // safeVertexNumber(String)
+
+  void shortestPath(int source, int sink) {
+    ArrayList<Integer> arr = reachableFrom(source);
+    double[] distances = new double[Math.max(Collections.max(arr), source)];
+    ArrayList<Edge>[] paths = new Edge[](new ArrayList<>());
+    
+    for (int i = 0; i < distances.length; i++) {
+      distances[i] = Double.POSITIVE_INFINITY;
+    } // for
+
+    distances[source] = 0;
+
+    Iterable<Edge> neighbors = edgesFrom(source);
+    ArrayList<Edge> n = new ArrayList<>();
+    for (Edge ne : neighbors) {
+      if (!isMarked(ne.target())) {
+        n.add(ne);
+      }
+    } // for
+
+    while (!isMarked(sink) && !n.isEmpty()) {
+      Edge found = Collections.min(n, Comparator.comparingInt(a -> a.weight()));
+      mark(found.target());
+      Iterable<Edge> neighborsOfFound = edgesFrom(found.target());
+      for (Edge ne : neighborsOfFound) { 
+        if (ne.weight() + distances[ne.source()] < distances[ne.target()]) {
+          distances[ne.target()] = ne.weight() + distances[ne.source()];
+                
+        }
+      }
+
+    }
+
+  }
 
 } // class Graph
